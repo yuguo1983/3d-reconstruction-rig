@@ -1,0 +1,13 @@
+{
+  "sync_window_ms": 10.0,
+  "output_dir": "./captures",
+  "backend": "dshow",
+  "cameras": [
+    {"index": 0, "name": "cam0_north",   "exposure": -7.0, "focus": 80},
+    {"index": 1, "name": "cam1_northeast","exposure": -7.0, "focus": 80},
+    {"index": 2, "name": "cam2_southeast","exposure": -7.0, "focus": 80},
+    {"index": 3, "name": "cam3_south",   "exposure": -7.0, "focus": 80},
+    {"index": 4, "name": "cam4_southwest","exposure": -7.0, "focus": 80},
+    {"index": 5, "name": "cam5_northwest","exposure": -7.0, "focus": 80}
+  ]
+}

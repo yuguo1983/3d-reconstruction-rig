@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+
+# COLMAP 工具链 (二进制 + 源码, 需要时重新下载)
+tools/
+colmap/
+
+# 采集 / 重建产物 (流水线生成, 用时再生)
+captures/
+colmap_images/
+synthetic/
+calib/
+calib_from_synth/
+sparse_test/
+sparse_*/
+
+# COLMAP 数据库 (每次重建会重写)
+*.db
+
+# 流水线生成的中间配置 (跑 rig_to_colmap_config.py 重新生成)
+rig_config.json
+
+# 大型二进制
+*.zip
+*.tar.gz
+*.7z
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 项目元数据 (Claude / AtomCode 等)
+.claude/
+.atomcode/
+
+# 本地配置覆盖
+rig.local.json
