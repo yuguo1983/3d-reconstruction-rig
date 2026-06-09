@@ -21,6 +21,7 @@
 ├── compare_reconstruction.py    6b. 把 COLMAP 重建结果跟 GT 对比
 ├── make_synthetic_rig.py        A. 合成 6 路数据(无硬件也能跑通整条流水线)
 ├── run_pipeline.sh              B. 合成数据 → COLMAP 端到端一键脚本
+├── rig_ui.py                    C. PyQt5 桌面端: 2×3 实时预览 + 一键抓帧
 │
 ├── rig.json                     相机索引/分辨率/曝光/对焦的配置
 ├── tools/colmap/                COLMAP 4.1.0(无 CUDA)
@@ -54,6 +55,9 @@
 
 ### 3.1 相机抓帧
 
+**图形界面(推荐)**: `python rig_ui.py` 打开 PyQt5 桌面端, 6 路实时预览 + 一键抓帧, 无需记命令.
+
+**命令行**:
 ```bash
 # 采集 30 组(每组 6 张)ChArUco 板多角度图
 python rig_capture.py --config rig.json --count 30 --output ./captures
