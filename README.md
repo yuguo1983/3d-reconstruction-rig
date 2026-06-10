@@ -234,6 +234,64 @@ python compare_reconstruction.py \
 - 外参误差 R 角度误差(度)、T 平移误差(mm 和 %)
 - 已注册图像数(`0 / 180` = 全部没接上,需要回头查)
 
+
+
+### 3.8 稠密重建 + 网格
+
+```bash
+bash dense_recon.sh
+```
+
+四步串起来, 无 GPU 走 CPU:
+
+| 步骤 | COLMAP 命令 | 输出 |
+|------|-------------|------|
+| 去畸变 | `image_undistorter` | `dense/images/` 去畸变图 |
+| 深度估计 | `patch_match_stereo` (gpu_index=-1 走 CPU) | `dense/stereo/depth_maps/*.bin` |
+| 深度融合 | `stereo_fusion` | `dense/fused.ply` 稠密点云 |
+| Poisson 网格 | `poisson_mesher` | `dense/meshed-poisson.ply` |
+
+**CPU 耗时** (6 路 × 30 帧 1080p):
+- `patch_match_stereo` 是大头, **30-60 分钟**; 其余几步几分钟
+- 加 `--max_image_size 2000` 把 1920×1080 降到 2000 长边, 提速 ~30%, 精度损失可忽略
+
+### 3.9 给网格贴纹理
+
+```bash
+python texturize.py --mesh dense/meshed-poisson.ply --sparse dense
+```
+
+**算法** (不引新依赖, 纯 numpy + opencv):
+1. 解析 Poisson 输出的 ASCII PLY
+2. 解析 `cameras.txt` + `images.txt` 得到 6 路位姿和内参
+3. 对每个三角面:
+   - 用 `pick_best_view` 选最正面的相机 (检查 `centroid_cam[2] > 0` 和 `normal·-view > 0`)
+   - 把 3 个顶点投影到该相机的图像 → UV
+4. 写 `dense/model.obj` (带 UV) + `dense/model.mtl` (6 个材质) + 引用 6 张相机图
+
+**输出格式**: 标准 `.obj + .mtl + 6 张 .jpg`, MeshLab / Blender / CloudCompare / Three.js / Sketchfab 都吃.
+
+**已知限制** (v1 没有这些):
+- **没有 seam leveling**: 不同相机接缝处能看出明显接缝
+- **没有 multi-view blending**: 每个面只来自一张图, 光照/曝光不统一
+- **没有遮挡检查**: 投影后落在图像外的顶点 UV 会越界, 但 .obj 仍能打开
+
+**想要更好效果**? 装 mvs-texturing 重做贴图:
+```bash
+git clone https://github.com/nmoehrle/mvs-texturing
+cd mvs-texturing && cmake -B build && cmake --build build --config Release
+# 然后用它对 fused.ply + dense/images/ 重做
+```
+
+### 3.10 格式转换 (可选)
+
+把 `.obj` 转 `.glb` / `.stl` / `.ply`:
+
+```bash
+# 用 trimesh (pip install trimesh)
+python -c "import trimesh; m=trimesh.load('dense/model.obj', process=False); m.export('dense/model.glb')"
+python -c "import trimesh; m=trimesh.load('dense/model.obj', process=False); m.export('dense/model.stl')"
+```
 ---
 
 ## 4. 合成数据一键跑通(无硬件也能验证)
