@@ -166,6 +166,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.rig: QtRigCapture | None = None
         self.session_dir: Path | None = None
         self.captured_in_session = 0
+        self._session_seq = 0  # 防止同秒内点 [新会话] 撞到同一目录
 
         self._build_ui()
         if initial_config and initial_config.exists():
@@ -367,9 +368,10 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.rig is None or self.cfg is None:
             self.log_msg("错误: 先开始预览")
             return
-        # 懒创建 session dir
+        # 懒创建 session dir (加序号防同秒撞名)
         if self.session_dir is None:
-            session = time.strftime("%Y%m%d_%H%M%S")
+            self._session_seq += 1
+            session = f"{time.strftime('%Y%m%d_%H%M%S')}_{self._session_seq:03d}"
             self.session_dir = Path(self.out_edit.text()) / session
             self.session_dir.mkdir(parents=True, exist_ok=True)
             self.captured_in_session = 0
